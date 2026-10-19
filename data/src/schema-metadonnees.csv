@@ -1,0 +1,55 @@
+Groupe,Clé,Libellé,Type ,Description
+Général,storageType,Type,Texte,"Mode de stockage du jeu : Fichier (téléversé), Éditable (REST, modifiable ligne à ligne), Virtuel (vue sur d'autres jeux) ou Métadonnées (référencement sans données)."
+Général,page,Lien,Texte,Lien vers la page du jeu de données sur data-fair.
+Général,id,Identifiant,Texte,Identifiant technique unique du jeu de données.
+Général,slug,Slug,Texte,"Identifiant lisible du jeu, utilisé dans les URLs, modifiable."
+Général,title,Titre,Texte,Titre du jeu de données.
+Général,summary,Résumé,Texte,Court résumé du jeu de données (une à deux phrases maximum).
+Général,description,Description,Texte,Description détaillée du jeu de données (texte markdown).
+Général,image,Image,Texte,URL de l'image d'illustration du jeu. Peut référencer une pièce jointe via son url.
+Général,keywords,Mots-clés,Texte,Mots-clés libres associés au jeu de données.
+Général,topics,Thématiques,Texte,Thématiques (référentiel défini dans les paramètres de l'organisation) rattachées au jeu.
+Métadonnées,license,Licence,Texte,Licence de réutilisation des données.
+Métadonnées,conformsTo,Schéma (conforme à),Texte,Schéma ou standard de données auquel le jeu déclare se conformer.
+Métadonnées,conformsToVersion,Schéma — version,Texte,Version du schéma de conformité.
+Métadonnées,conformsToUrl,Schéma — URL,Texte,URL de la définition du schéma de conformité.
+Métadonnées,origin,Origine,Texte,Origine des données (URL ou description de la source).
+Métadonnées,creator,Créateur,Texte,Auteur ou producteur des données.
+Métadonnées,frequency,Fréquence de mise à jour,Texte,Fréquence de mise à jour annoncée pour les données (métadonnée DCAT).
+Métadonnées,spatial,Couverture spatiale,Texte,Description textuelle de la couverture géographique des données.
+Métadonnées,temporalStart,Début de couverture temporelle,Date,Date de début de la période couverte par les données.
+Métadonnées,temporalEnd,Fin de couverture temporelle,Date,Date de fin de la période couverte par les données.
+Métadonnées,modified,Date de modification de la source,Date,Métadonnée DCAT « date de modification de la source » (saisie sur le jeu de données).
+Métadonnées,relatedDatasets,Jeux de données associés,Texte,Autres jeux de données recommandés en lien avec celui-ci.
+Métadonnées calculées,bbox,Boîte englobante,Texte,"Emprise géographique calculée automatiquement (min lon, min lat, max lon, max lat)."
+Métadonnées calculées,projection,Projection,Texte,Système de projection géographique détecté pour les données.
+Métadonnées calculées,timeZone,Fuseau horaire,Texte,Fuseau horaire détecté pour les colonnes de date/heure du jeu.
+Métadonnées calculées,metadataScore,Qualité des métadonnées,Nombre entier,"Score de complétude et de qualité des métadonnées, de 0 à 100, recalculé à chaque exécution du traitement à partir des valeurs de cette même ligne. Dix critères reçoivent une note de 0 à 1, multipliée par leur nombre de points. Le total est ramené sur 100 : score = 100 x points obtenus / 20. Pour un critère donné, le premier cas qui s'applique l'emporte. Critère Points Note Description 4 vide : 0 ; identique au titre : 0 ; moins de 100 caractères : 0,25 ; plus de 5000 caractères : 0,25 ; plus de 3000 : 0,5 ; commence par le titre : 0,5 ; sinon : 1 Résumé 3 vide : 0 ; identique au titre : 0 ; contient du HTML, du markdown ou un lien : 0,25 ; moins de 50 caractères : 0,5 ; jusqu'à 200 : 1 ; de 201 à 250 : 0,75 ; au-delà de 250 : 0,25 Licence 3 vide : 0 ; sinon : 1 Mots-clés 2 aucun : 0 ; 1 ou 2 : 0,5 ; de 3 à 9 : 1 ; 10 ou plus : 0,5 Thématiques 2 vide : 0 ; sinon : 1 Créateur 2 vide : 0 ; sinon : 1 Origine 1 vide : 0 ; sinon : 1 Fréquence de mise à jour 1 vide : 0 ; sinon : 1 Couverture spatiale 1 vide : 0 ; sinon : 1 Couverture temporelle 1 début et fin vides : 0 ; sinon : 1 La longueur de la description est mesurée balises HTML retirées. Les comparaisons avec le titre ignorent la casse, les accents et la ponctuation. Le score final est arrondi à l'entier."
+Propriété & visibilitéPropriété & visibilité,owner,Propriétaire,Texte,"Compte propriétaire du jeu (utilisateur ou organisation, éventuellement un de ses départements)."
+Propriété & visibilité,visibility,Visibilité,Texte,"Visibilité du jeu : Public (accessible à tous), Protégé (accès restreint par permissions) ou Privé."
+Propriété & visibilité,published,Publié,Booléen,Vrai si le jeu est publié sur au moins un site/portail de publication (équivaut à « Nombre de sites de publication » &gt; 0).
+Fichier,fileName,Nom du fichier,Texte,Nom du fichier d'origine téléversé (jeux de type Fichier).
+Fichier,fileFormat,Format du fichier,Texte,Type MIME du fichier d'origine.
+Structure & stockage,count,Nombre de lignes,Nombre entier,Nombre de lignes (enregistrements) indexées dans le jeu.
+Structure & stockage,nbColumns,Nombre de colonnes,Nombre entier,"Nombre de colonnes du schéma, hors colonnes calculées."
+Structure & stockage,primaryKey,Clé primaire,Texte,"Colonne(s) composant la clé primaire, qui identifie de façon unique une ligne."
+Structure & stockage,storageSize,Taille de stockage (octets),Nombre entier,Taille de stockage des données (fichier et base).
+Structure & stockage,indexedSize,Taille indexée (octets),Nombre entier,Taille de l'index de recherche.
+Relations & enrichissements,nbExtensions,Nombre d'enrichissements,Nombre entier,Nombre d'enrichissements (extensions) appliqués au jeu pour compléter ses données à partir de sources externes.
+Relations & enrichissements,nbAttachments,Nombre de pièces jointes,Nombre entier,Nombre de fichiers joints au jeu de données.
+Relations & enrichissements,nbChildren,Nombre de jeux sources (virtuel),Nombre entier,"Pour un jeu virtuel, nombre de jeux sources qu'il agrège."
+Relations & enrichissements,nbUsedInVirtual,Réutilisé dans N jeux virtuels,Nombre entier,Nombre de jeux virtuels qui utilisent ce jeu comme source (calculé sur l'ensemble du catalogue).
+Relations & enrichissements,nbApplications,Nombre d'applications,Nombre entier,Nombre de visualisations/applications réutilisant ce jeu de données.
+Relations & enrichissements,nbRelatedDatasets,Nombre de jeux associés,Nombre entier,Nombre de jeux de données déclarés comme associés/recommandés.
+Données de référence,isMasterData,Donnée de référence,Booléen,Vrai si le jeu est exploitable comme donnée de référence : il expose au moins un service d'enrichissement ou de recherche code/libellé réutilisable par d'autres jeux.
+Données de référence,nbBulkSearchs,Enrichissements proposés (en masse),Nombre entier,Nombre de services « récupération de lignes en masse » exposés ; chacun constitue une source d'enrichissement réutilisable par d'autres jeux.
+Données de référence,nbSingleSearchs,Recherches code/libellé,Nombre entier,"Nombre de services de recherche code/libellé exposés, utilisables dans les formulaires de saisie des jeux éditables."
+Publication,publicationPortals,Portails de publication,Texte,Identifiants (type:id) des sites/portails sur lesquels le jeu est effectivement publié.
+Publication,nbPublicationSites,Nombre de sites de publication,Nombre entier,Nombre de sites/portails sur lesquels le jeu est effectivement publié.
+Publication,nbRequestedPublicationSites,Sites de publication demandés,Nombre entier,Nombre de demandes de publication en attente de validation par un administrateur.
+Etat,status,Statut,Texte,"État courant du jeu dans data-fair (par ex. finalized, indexing, error"
+Audit & dates,createdAt,Date de création,Date et heure,Date de création du jeu de données.
+Audit & dates,updatedAt,Date de mise à jour,Date et heure,Date de la dernière modification du jeu (métadonnées ou données).
+Audit & dates,dataUpdatedAt,Date de mises à jour des données,Date et heure,Date de la dernière mise à jour des données elles-mêmes.
+Audit & dates,finalizedAt,Date de finalisation,Date et heure,Date de fin du dernier traitement d'indexation (jeu prêt à l'emploi).
+Audit & dates,portalModified,Date de modification (portail),Date et heure,"La date utilisée pour le tri et l'affichage sur le portail (modified, sinon dataUpdatedAt, sinon updatedAt)."
