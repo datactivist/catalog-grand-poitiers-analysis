@@ -498,11 +498,11 @@ def compute_dataset_metrics(df: pd.DataFrame, params: dict, ref_date: date) -> p
 def apply_scores(m: pd.DataFrame, weights: dict) -> pd.DataFrame:
     """Score global = moyenne pondérée des scores par dimension (pondérations normalisées)."""
     m = m.copy()
+    m["score_completude"] = m["completude_pct"].fillna(0.0)
     w = pd.Series({k: float(v) for k, v in weights.items() if k in SCORE_LABELS and k in m.columns})
     if w.sum() <= 0:
         w[:] = 1.0
     w = w / w.sum()
-    m["score_completude"] = m["completude_pct"].fillna(0.0)
     m["score_global"] = (m[list(w.index)].fillna(0.0) * w).sum(axis=1).round(1)
     m["niveau_qualite"] = m["score_global"].map(level_of)
     return m
