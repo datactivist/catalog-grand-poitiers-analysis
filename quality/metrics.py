@@ -16,7 +16,7 @@ import pandas as pd
 from . import textkit as tk
 from .config import (
     FREQUENCIES, GENERIC_KEYWORDS, INTERNAL_ORIGIN_EXACT, INTERNAL_ORIGIN_SUBSTRINGS, INTERNAL_URL_DOMAINS,
-    KW_REFERENCE_FIELDS, QUALITY_LEVELS, SCORE_LABELS,
+    KW_REFERENCE_FIELDS, QUALITY_LEVELS, SCORE_LABELS, COMMUNE_PREFIXES, COMMUNES_GP,
 )
 from .loader import completeness_table, is_filled
 
@@ -24,8 +24,8 @@ NA_LABEL = "(non renseigné)"
 TRANCHES_ORDER = ["≤ 1 mois", "1–6 mois", "6–12 mois", "1–2 ans", "> 2 ans", "Date inconnue"]
 TEMPOREL_ORDER = ["Période close", "Ponctuelle (début = fin)", "Début seul (en cours)", "Fin seule",
                   "Incohérente (fin < début)", "Non renseignée"]
-SPATIAL_ORDER = ["Grand Poitiers (intercommunal)", "Ville de Poitiers", "Autre commune / territoire", "Non renseigné"]
-PROVENANCE_ORDER = ["Interne (Grand Poitiers / Ville de Poitiers)", "Autre organisme (nom cité)",
+SPATIAL_ORDER = ["Grand Poitiers (intercommunal)", "Autre commune / territoire", "Non renseigné"]
+PROVENANCE_ORDER = ["Interne (Grand Poitiers)", "Communes de Grand-Poitiers", "Autre organisme",
                     "data.gouv.fr (URL)", "Autre source web (URL)", "Non renseignée"]
 LICENCE_ORDER = ["Licence Ouverte (Etalab)", "ODbL", "Creative Commons", "Autre licence", "Non renseignée"]
 STATUT_ORDER = ["À jour", "En retard", "Très en retard", "Non évaluable (fréquence irrégulière)",
@@ -49,13 +49,20 @@ def licence_family(label: str) -> str:
     return "Autre licence"
 
 
+def _commune_key(s: str) -> str:
+    return re.sub(r"[^a-z0-9]+", " ", tk.strip_accents(s.lower())).strip()
+
+
+_COMMUNE_KEYS = {_commune_key(c) for c in COMMUNES_GP}
+
+
 def provenance_type(origin: str) -> str:
     """Règles détaillées dans config.PROVENANCE_RULES (affichées dans l'onglet Méthodologie)."""
     o = origin.strip()
     if not o:
         return "Non renseignée"
     k = tk.strip_accents(o.lower())
-    internal = "Interne (Grand Poitiers / Ville de Poitiers)"
+    internal = "Interne (Grand Poitiers)"
     if k.startswith(("http://", "https://", "www.")):
         if "data.gouv.fr" in k:
             return "data.gouv.fr (URL)"
@@ -66,7 +73,14 @@ def provenance_type(origin: str) -> str:
     label = re.sub(r"\s+", " ", k).strip()
     if any(sub in label for sub in INTERNAL_ORIGIN_SUBSTRINGS) or label in INTERNAL_ORIGIN_EXACT:
         return internal
-    return "Autre organisme (nom cité)"
+    name = _commune_key(label)
+    for p in COMMUNE_PREFIXES:
+        if name.startswith(p):
+            name = name[len(p):]
+            break
+    if name in _COMMUNE_KEYS:
+        return "Communes de Grand-Poitiers"
+    return "Autre organisme"
 
 
 def spatial_type(label: str) -> str:
@@ -75,8 +89,6 @@ def spatial_type(label: str) -> str:
         return "Non renseigné"
     if "grand poitiers" in k or re.search(r"\bcu\b|communaute urbaine|agglo", k):
         return "Grand Poitiers (intercommunal)"
-    if re.fullmatch(r"(ville de |commune de )?poitiers", k):
-        return "Ville de Poitiers"
     return "Autre commune / territoire"
 
 

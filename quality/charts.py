@@ -427,26 +427,40 @@ def freshness_strip(m: pd.DataFrame, params: dict, order: list[str], height=460)
     return style(fig, height)
 
 
-def radar(values: dict, title=None, height=340):
+def radar(values: dict, title=None, height=340, name="Jeu sélectionné", reference=None):
     labels, vals = list(values.keys()), [float(v) for v in values.values()]
     fig = go.Figure(
         go.Scatterpolar(
             r=vals + vals[:1],
             theta=labels + labels[:1],
+            name=name,
             fill="toself",
             line=dict(color=PALETTE["primary"], width=2),
             fillcolor="rgba(90,82,199,0.25)",
             hovertemplate="%{theta}<br><b>%{r:.0f}</b>/100<extra></extra>",
         )
     )
+    if reference:
+        ref = [float(reference[k]) for k in labels]
+        fig.add_trace(
+            go.Scatterpolar(
+                r=ref + ref[:1],
+                theta=labels + labels[:1],
+                name="Moyenne du catalogue",
+                line=dict(color=PALETTE["text"], width=1.5, dash="dot"),
+                hovertemplate="%{theta}<br>moyenne <b>%{r:.0f}</b>/100<extra></extra>",
+            )
+        )
     fig.update_layout(
         polar=dict(
             radialaxis=dict(range=[0, 100], gridcolor=PALETTE["grid"]),
             angularaxis=dict(gridcolor=PALETTE["grid"]),
         ),
-        showlegend=False,
+        showlegend=True,
     )
-    return style(fig, height, title)
+    style(fig, height, title)
+    fig.update_layout(margin=dict(l=60, r=60, t=55 if title else 30, b=70))
+    return fig
 
 
 def scatter_native(m: pd.DataFrame, height=380):

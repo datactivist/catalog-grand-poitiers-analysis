@@ -255,13 +255,25 @@ FREQUENCY_ORDER = [v[0] for v in FREQUENCIES.values()]
 # pour ne pas classer comme interne "Université de Poitiers" ou "CHU de Poitiers".
 INTERNAL_ORIGIN_SUBSTRINGS = ["grand poitiers"]
 INTERNAL_ORIGIN_EXACT = [
-    "poitiers",
-    "ville de poitiers",
-    "commune de poitiers",
-    "mairie de poitiers",
     "cu de poitiers",
 ]
-INTERNAL_URL_DOMAINS = ["grandpoitiers", "poitiers.fr"]
+INTERNAL_URL_DOMAINS = ["grandpoitiers"]
+
+# Communes de Grand Poitiers, lues dans le référentiel officiel (colonne NOM_COMMUNE).
+COMMUNES_CSV = ROOT / "data" / "src" / "decoupages-administratifs-communaute-urbaine-gp-40-communes-grand-poitiers-donnees-de-reference.csv"
+COMMUNE_PREFIXES = ["ville de ", "ville d ", "commune de ", "commune d ", "mairie de ", "mairie d "]
+
+
+def load_communes(path: Path = COMMUNES_CSV) -> list[str]:
+    import pandas as pd
+
+    try:
+        return pd.read_csv(path, usecols=["NOM_COMMUNE"])["NOM_COMMUNE"].dropna().astype(str).tolist()
+    except (FileNotFoundError, ValueError):
+        return []
+
+
+COMMUNES_GP = load_communes()
 
 # Référentiel FALC (Facile à Lire et à Comprendre)
 # Source vérifiée : « L'information pour tous - Règles européennes pour une information facile à lire et à comprendre »
@@ -540,17 +552,22 @@ PROVENANCE_RULES = [
         "un jeu de Grand Poitiers republié sur data.gouv.fr est classé ici.",
     ),
     (
-        "Interne (Grand Poitiers / Ville de Poitiers)",
-        "URL dont le domaine contient grandpoitiers ou poitiers.fr ; OU texte contenant « Grand Poitiers » ; "
-        "OU texte égal à « Poitiers », « Ville de Poitiers », « Commune de Poitiers », « Mairie de Poitiers ».",
+        "Interne (Grand Poitiers)",
+        "URL dont le domaine contient grandpoitiers ; OU texte contenant « Grand Poitiers » ; OU texte égal à « CU de Poitiers »."
+        ,
+    ),
+    (
+        "Communes de Grand-Poitiers",
+        "Texte égal au nom d'une des 40 communes du référentiel (Poitiers comprise), éventuellement précédé de « Ville de », "
+        "« Commune de » ou « Mairie de » (comparaison sans accents, casse ni tirets).",
     ),
     (
         "Autre source web (URL)",
         "Toute autre URL (INSEE, data.education.gouv.fr, Hub'Eau…).",
     ),
     (
-        "Autre organisme (nom cité)",
-        "Tout autre texte : INSEE, Vitalis, Cerema, une autre commune de l'agglomération (Migné-Auxances, Montamisé)…",
+        "Autre organisme",
+        "Tout autre texte : INSEE, Vitalis, Cerema, Université de Poitiers…",
     ),
 ]
 SPATIAL_RULES = [
@@ -560,12 +577,8 @@ SPATIAL_RULES = [
         "Le libellé contient « Grand Poitiers », « CU », « communauté urbaine » ou « agglo ».",
     ),
     (
-        "Ville de Poitiers",
-        "Le libellé est exactement « Poitiers », « Ville de Poitiers » ou « Commune de Poitiers ».",
-    ),
-    (
         "Autre commune / territoire",
-        "Tout autre libellé (Migné-Auxances, Montamisé, Seuil du Poitou…).",
+        "Tout autre libellé, y compris « Poitiers » / « Ville de Poitiers » et les 39 autres communes de Grand Poitiers (Migné-Auxances, Montamisé…), ou un autre territoire (Seuil du Poitou…).",
     ),
 ]
 LICENCE_RULES = [

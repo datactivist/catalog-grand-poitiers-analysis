@@ -143,8 +143,22 @@ _WIDE = {
 }
 
 
+_CURRENT_SECTION: str | None = None
+
+
 def show(fig, key: str | None = None):
     if fig is not None:
+        # Sans titre dans la figure, l'export PNG de Plotly n'en contient pas :
+        # on reprend alors le titre de la section courante.
+        if _CURRENT_SECTION and not (fig.layout.title and fig.layout.title.text):
+            fig.update_layout(
+                title=dict(
+                    text=_CURRENT_SECTION,
+                    x=0.0,
+                    font=dict(size=15, color=charts.PALETTE["primary"]),
+                ),
+                margin=dict(t=55),
+            )
         st.plotly_chart(fig, key=key, **_WIDE["plotly_chart"])
 
 
@@ -400,6 +414,8 @@ with st.sidebar:
 # --------------------------------------------------------------------------- #
 def section(title: str, keys=(), sub: str | None = None):
     """Titre de section avec infobulle ⓘ reprenant les descriptions du schéma de métadonnées."""
+    global _CURRENT_SECTION
+    _CURRENT_SECTION = title
     tips = [HINTS[k] for k in keys if k in HINTS]
     tip_html = ""
     if tips:
@@ -635,10 +651,6 @@ with tabs[1]:
         "Les champs marqués * ne sont pas dans le fichier exporté : le tableau de bord les crée vides (à 0 %).",
     )
     show(charts.completeness_bar(comp), "comp_bar")
-    docs_links(
-        ["admin_jeux", "contributeur"],
-        "📘 Où renseigner ces métadonnées dans Data Fair :",
-    )
 
     def _comp_reading():
         e = comp[comp["dans_export"]]
@@ -1657,7 +1669,7 @@ with tabs[6]:
     section(
         "Couverture spatiale : avant / après regroupement",
         ["spatial"],
-        "Libellés saisis (à gauche) et regroupement Grand Poitiers / Ville de Poitiers / autre commune (à droite).",
+        "Libellés saisis (à gauche) et regroupement Grand Poitiers / autre commune (à droite).",
     )
     a, b = st.columns(2)
     sr = vc(m["spatial"])
@@ -1694,8 +1706,7 @@ with tabs[6]:
         reading(
             lambda: (
                 f"{int(sty.get('Grand Poitiers (intercommunal)', 0))} jeux ({pct(sty.get('Grand Poitiers (intercommunal)', 0), N)}) couvrent "
-                f"l'ensemble de Grand Poitiers, {int(sty.get('Ville de Poitiers', 0))} la seule ville de Poitiers, "
-                f"{int(sty.get('Autre commune / territoire', 0))} une autre commune ; "
+                f"l'ensemble de Grand Poitiers, {int(sty.get('Autre commune / territoire', 0))} une commune (Poitiers comprise) ou un autre territoire ; "
                 f"{int(sty.get('Non renseigné', 0))} n'ont pas de couverture renseignée."
             )
         )
@@ -1996,7 +2007,12 @@ with tabs[8]:
         a, b = st.columns([2, 3])
         with a:
             show(
-                charts.radar({cfg.SCORE_LABELS[d]: r[d] for d in dims}, height=360),
+                charts.radar(
+                    {cfg.SCORE_LABELS[d]: r[d] for d in dims},
+                    height=400,
+                    name=str(r["titre"])[:60],
+                    reference={cfg.SCORE_LABELS[d]: m[d].mean() for d in dims},
+                ),
                 "ds_radar",
             )
             reading(
@@ -2109,8 +2125,7 @@ with tabs[9]:
         f"- **Mot-clé générique** : mot-clé qui, après normalisation, est égal à l'un de ceux de cette liste fixe, choisie par nos soins : "
         f"*{', '.join(sorted(cfg.GENERIC_KEYWORDS))}*. Sur votre catalogue actuel, aucun jeu n'en contient. "
         "Une approche complémentaire, par les données, est le tableau « mots-clés les plus répandus ».\n"
-        "- **Complémentarité** (remplace l'ancien « ancrage dans le texte », qui traitait à tort un mot-clé absent du texte comme un défaut). "
-        f"On décompose chaque mot-clé en racines de mots (hors mots vides) et on les cherche dans les racines des autres métadonnées : "
+        f"- **Complémentarité** : On décompose chaque mot-clé en racines de mots (hors mots vides) et on les cherche dans les racines des autres métadonnées : "
         f"{', '.join(cfg.KW_REFERENCE_FIELDS)}. Le mot-clé est **redondant** si toutes ses racines y figurent, **complémentaire** si aucune n'y figure, "
         "**partiel** sinon. Un mot-clé qui ne contient que des mots vides est ignoré.\n"
         "- **Vocabulaire nouveau d'un jeu** : part des racines de ses mots-clés absentes des autres métadonnées. "
@@ -2131,9 +2146,9 @@ with tabs[9]:
     st.markdown("**Provenance** (champ `origin`) : règles appliquées dans l'ordre")
     classification_block("provenance")
     st.caption(
-        "Choix et limites : (1) seule une origine contenant « Grand Poitiers », ou égale à « Poitiers / Ville / Commune / Mairie de Poitiers », est "
-        "« interne », on n'utilise pas « contient Poitiers » pour ne pas classer l'Université ou le CHU de Poitiers comme internes ; "
-        "(2) les autres communes de l'agglomération sont classées « autre organisme » ; (3) un jeu de Grand Poitiers republié sur data.gouv.fr "
+        "Choix et limites : (1) seule une origine contenant « Grand Poitiers » est « interne » ; "
+        "(2) les 40 communes du référentiel (Poitiers comprise) forment la catégorie « Communes de Grand-Poitiers », "
+        "l'Université ou le CHU de Poitiers restent « autre organisme » ; (3) un jeu de Grand Poitiers republié sur data.gouv.fr "
         "est classé « data.gouv.fr » ; (4) les valeurs peu informatives (« Jeux de données national ») tombent dans « autre organisme »."
     )
     st.markdown("**Couverture spatiale** (champ `spatial`)")
@@ -2201,7 +2216,7 @@ with tabs[9]:
     section("Référentiel FALC : ce que nous mesurons, comparé au guide officiel")
     st.markdown(
         "**Source vérifiée** : *L'information pour tous - règles européennes pour une information facile à lire et à comprendre* "
-        "(Unapei / Inclusion Europe, édition 2009), lu en entier. Le guide est organisé en **5 sections par type de support** : règles générales "
+        "(Unapei / Inclusion Europe, édition 2009). Le guide est organisé en **5 sections par type de support** : règles générales "
         "(20 règles), informations écrites (42), électroniques (30), vidéo, audio. Pour un texte, il demande d'appliquer les sections 1 et 2. "
         "Les références ci-dessous se lisent « §1 r.14 » = section 1, règle 14.\n\n"
         "**Ce que nous n'avons pas consulté** : la liste de vérification officielle (plus de 50 questions, citée à la fin du guide) et les éventuelles "
